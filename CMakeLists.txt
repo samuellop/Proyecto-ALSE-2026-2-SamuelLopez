@@ -20,6 +20,8 @@ set(PROJECT_SOURCES
     src/core/AuthService.h
     src/ui/LoginWindow.cpp
     src/ui/LoginWindow.h
+    src/ui/MainWindow.cpp
+    src/ui/MainWindow.h
 )
 
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})

@@ -2,6 +2,7 @@
 #include <QMessageBox>
 #include "data/DatabaseManager.h"
 #include "ui/LoginWindow.h"
+#include "ui/MainWindow.h"
 
 int main(int argc, char *argv[])
 {
@@ -13,14 +14,17 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    // 1. Creamos ambas ventanas
     LoginWindow loginWin;
-    
-    // Cuando el login sea exitoso, mostramos un mensaje por ahora
+    MainWindow mainWin;
+
+    // 2. Conectamos la señal de login exitoso
     QObject::connect(&loginWin, &LoginWindow::loginExitoso, [&]() {
-        QMessageBox::information(nullptr, "Éxito", "¡Bienvenido al sistema! (Aquí irá la ventana principal)");
-        app.quit(); // Cerramos la app por ahora
+        mainWin.show(); // Mostramos la principal
+        loginWin.hide(); // Ocultamos el login (no lo cerramos para que no muera)
     });
 
+    // 3. Mostramos el login al arrancar
     loginWin.show();
     
     return app.exec();
