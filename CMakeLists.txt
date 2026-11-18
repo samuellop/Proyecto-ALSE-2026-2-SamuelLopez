@@ -14,6 +14,8 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets Sql Charts)
 # Archivos fuente
 set(PROJECT_SOURCES
     src/main.cpp
+    src/data/DatabaseManager.cpp
+    src/data/DatabaseManager.h
 )
 
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
