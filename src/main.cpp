@@ -1,8 +1,7 @@
 #include <QApplication>
-#include <QLabel>
 #include <QMessageBox>
-#include <QDebug>
 #include "data/DatabaseManager.h"
+#include "ui/LoginWindow.h"
 
 int main(int argc, char *argv[])
 {
@@ -14,11 +13,15 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    QLabel label("¡Base de datos conectada! 🏍️");
-    label.setWindowTitle("ALSE - Inventario Motos");
-    label.resize(400, 100);
-    label.setAlignment(Qt::AlignCenter);
-    label.show();
+    LoginWindow loginWin;
+    
+    // Cuando el login sea exitoso, mostramos un mensaje por ahora
+    QObject::connect(&loginWin, &LoginWindow::loginExitoso, [&]() {
+        QMessageBox::information(nullptr, "Éxito", "¡Bienvenido al sistema! (Aquí irá la ventana principal)");
+        app.quit(); // Cerramos la app por ahora
+    });
+
+    loginWin.show();
     
     return app.exec();
 }
