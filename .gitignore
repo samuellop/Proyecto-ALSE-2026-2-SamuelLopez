@@ -30,3 +30,6 @@ ui_*.h
 # Archivos del sistema
 .DS_Store
 Thumbs.db
+build/
+html/
+latex/
