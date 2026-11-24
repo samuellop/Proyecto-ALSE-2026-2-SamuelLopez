@@ -87,6 +87,7 @@ void MainWindow::configurarModelo()
     m_modelo->setTable("articulos");
     m_modelo->setEditStrategy(QSqlTableModel::OnManualSubmit);
     
+    m_modelo->setFilter("activo = 1");
     m_modelo->select();
     m_tabla->setModel(m_modelo);
     
@@ -111,21 +112,16 @@ void MainWindow::configurarModelo()
 void MainWindow::filtrarTabla(const QString &texto)
 {
     if (texto.isEmpty()) {
-        m_modelo->setFilter("");
+        m_modelo->setFilter("activo = 1");
     } else {
-        QString filtro = QString("codigo LIKE '%%1%' OR nombre LIKE '%%1%'").arg(texto);
-        m_modelo->setFilter(filtro);
+        m_modelo->setFilter(QString("activo = 1 AND (codigo LIKE '%%1%' OR nombre LIKE '%%1%')").arg(texto));
     }
     m_modelo->select();
 }
 
 void MainWindow::mostrarSoloStockBajo(bool activo)
 {
-    if (activo) {
-        m_modelo->setFilter("stock_actual <= stock_minimo");
-    } else {
-        m_modelo->setFilter(""); 
-    }
+    m_modelo->setFilter(activo ? "activo = 1 AND stock_actual <= stock_minimo" : "activo = 1");
     m_modelo->select();
 }
 
