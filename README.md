@@ -2,8 +2,8 @@
 
 Proyecto final del curso **Algoritmos en Sistemas Electrónicos** (ALSE 2026-2), Escuela Colombiana de Ingeniería Julio Garavito.
 
-- **Estudiante:** Samuel López
-- **Docente:** Ing. Daniel Palomino Suarez MSc.
+- **Estudiante:** Samuel Arturo López Chaparro
+- **Docente:** Ing. Daniel Palomino Suarez.
 - **Video de funcionamiento:** [ver video](https://youtu.be/qtIfLGqzIV0?si=rNshCaKJys5mX26O)
 
 ## Descripción
