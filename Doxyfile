@@ -2656,3 +2656,9 @@ GENERATE_LEGEND        = YES
 # The default value is: YES.
 
 DOT_CLEANUP            = YES
+
+# --- Ajustes del proyecto ALSE ---
+PROJECT_NAME           = "Gestor de Inventario de Motocicletas"
+PROJECT_BRIEF          = "Proyecto final ALSE 2026-2 - Samuel Lopez"
+INPUT                  = src README.md
+USE_MDFILE_AS_MAINPAGE = README.md
