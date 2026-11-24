@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "ArticuloDialog.h"
 #include "data/DatabaseManager.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -133,12 +134,33 @@ void MainWindow::mostrarSoloStockBajo(bool activo)
 
 void MainWindow::agregarArticulo()
 {
-    QMessageBox::information(this, "Info", "Próximamente: Diálogo para agregar repuesto.");
+    ArticuloDialog dialog(this);
+    if (dialog.exec() == QDialog::Accepted) {
+        if (dialog.guardar()) {
+            m_modelo->select(); // Refrescar tabla
+            QMessageBox::information(this, "Éxito", "Repuesto agregado correctamente.");
+        }
+    }
 }
 
 void MainWindow::editarArticulo()
 {
-    QMessageBox::information(this, "Info", "Próximamente: Diálogo para editar repuesto.");
+    QModelIndexList selected = m_tabla->selectionModel()->selectedRows();
+    if (selected.isEmpty()) {
+        QMessageBox::warning(this, "Aviso", "Seleccione un artículo para editar.");
+        return;
+    }
+
+    int row = selected.first().row();
+    int id = m_modelo->data(m_modelo->index(row, 0)).toInt(); // id está en la columna 0
+
+    ArticuloDialog dialog(this, id);
+    if (dialog.exec() == QDialog::Accepted) {
+        if (dialog.guardar()) {
+            m_modelo->select();
+            QMessageBox::information(this, "Éxito", "Repuesto actualizado correctamente.");
+        }
+    }
 }
 
 void MainWindow::eliminarArticulo()
