@@ -1,6 +1,7 @@
 #include "MainWindow.h"
-#include "ArticuloDialog.h"
 #include "data/DatabaseManager.h"
+#include "ArticuloDialog.h"
+#include "MovimientoDialog.h" // Nuevo include
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QTableView>
@@ -59,10 +60,12 @@ void MainWindow::configurarUI()
     QHBoxLayout *bottomLayout = new QHBoxLayout();
     m_btnAgregar = new QPushButton("Agregar Repuesto", this);
     m_btnEditar = new QPushButton("Editar", this);
+    m_btnMovimiento = new QPushButton("Registrar Entrada/Salida", this); // Nuevo
     m_btnEliminar = new QPushButton("Eliminar", this);
     
     bottomLayout->addWidget(m_btnAgregar);
     bottomLayout->addWidget(m_btnEditar);
+    bottomLayout->addWidget(m_btnMovimiento); // Nuevo
     bottomLayout->addWidget(m_btnEliminar);
     bottomLayout->addStretch();
 
@@ -74,6 +77,7 @@ void MainWindow::configurarUI()
     connect(m_btnExportar, &QPushButton::clicked, this, &MainWindow::exportarCSV);
     connect(m_btnAgregar, &QPushButton::clicked, this, &MainWindow::agregarArticulo);
     connect(m_btnEditar, &QPushButton::clicked, this, &MainWindow::editarArticulo);
+    connect(m_btnMovimiento, &QPushButton::clicked, this, &MainWindow::registrarMovimiento); // Nueva conexión
     connect(m_btnEliminar, &QPushButton::clicked, this, &MainWindow::eliminarArticulo);
 }
 
@@ -86,10 +90,6 @@ void MainWindow::configurarModelo()
     m_modelo->select();
     m_tabla->setModel(m_modelo);
     
-    // Ocultar columnas que no queremos que el usuario vea (por su índice numérico)
-    // Índices: 0:id, 1:codigo, 2:nombre, 3:descripcion, 4:id_categoria, 
-    // 5:id_marca, 6:precio_compra, 7:precio_venta, 8:stock_actual, 
-    // 9:stock_minimo, 10:ubicacion, 11:fecha_adquisicion, 12:activo
     m_tabla->setColumnHidden(0, true);  // id
     m_tabla->setColumnHidden(3, true);  // descripcion
     m_tabla->setColumnHidden(4, true);  // id_categoria
@@ -97,7 +97,6 @@ void MainWindow::configurarModelo()
     m_tabla->setColumnHidden(11, true); // fecha_adquisicion
     m_tabla->setColumnHidden(12, true); // activo
     
-    // Renombrar cabeceras visibles
     m_modelo->setHeaderData(1, Qt::Horizontal, "Código");
     m_modelo->setHeaderData(2, Qt::Horizontal, "Nombre");
     m_modelo->setHeaderData(6, Qt::Horizontal, "P. Compra");
@@ -106,7 +105,6 @@ void MainWindow::configurarModelo()
     m_modelo->setHeaderData(9, Qt::Horizontal, "Stock Mín.");
     m_modelo->setHeaderData(10, Qt::Horizontal, "Ubicación");
     
-    // Ajustar el ancho de las columnas automáticamente
     m_tabla->resizeColumnsToContents();
 }
 
@@ -115,7 +113,6 @@ void MainWindow::filtrarTabla(const QString &texto)
     if (texto.isEmpty()) {
         m_modelo->setFilter("");
     } else {
-        // Filtrar por código o nombre (usando LIKE para búsqueda parcial)
         QString filtro = QString("codigo LIKE '%%1%' OR nombre LIKE '%%1%'").arg(texto);
         m_modelo->setFilter(filtro);
     }
@@ -127,7 +124,7 @@ void MainWindow::mostrarSoloStockBajo(bool activo)
     if (activo) {
         m_modelo->setFilter("stock_actual <= stock_minimo");
     } else {
-        m_modelo->setFilter(""); // Limpiar filtro
+        m_modelo->setFilter(""); 
     }
     m_modelo->select();
 }
@@ -137,7 +134,7 @@ void MainWindow::agregarArticulo()
     ArticuloDialog dialog(this);
     if (dialog.exec() == QDialog::Accepted) {
         if (dialog.guardar()) {
-            m_modelo->select(); // Refrescar tabla
+            m_modelo->select();
             QMessageBox::information(this, "Éxito", "Repuesto agregado correctamente.");
         }
     }
@@ -152,13 +149,34 @@ void MainWindow::editarArticulo()
     }
 
     int row = selected.first().row();
-    int id = m_modelo->data(m_modelo->index(row, 0)).toInt(); // id está en la columna 0
+    int id = m_modelo->data(m_modelo->index(row, 0)).toInt();
 
     ArticuloDialog dialog(this, id);
     if (dialog.exec() == QDialog::Accepted) {
         if (dialog.guardar()) {
             m_modelo->select();
             QMessageBox::information(this, "Éxito", "Repuesto actualizado correctamente.");
+        }
+    }
+}
+
+void MainWindow::registrarMovimiento()
+{
+    QModelIndexList selected = m_tabla->selectionModel()->selectedRows();
+    if (selected.isEmpty()) {
+        QMessageBox::warning(this, "Aviso", "Seleccione un artículo para registrar movimiento.");
+        return;
+    }
+
+    int row = selected.first().row();
+    int id = m_modelo->data(m_modelo->index(row, 0)).toInt();
+    int stockActual = m_modelo->data(m_modelo->index(row, 8)).toInt();
+
+    MovimientoDialog dialog(id, stockActual, this);
+    if (dialog.exec() == QDialog::Accepted) {
+        if (dialog.guardar(1)) { // ID 1 simula al usuario admin
+            m_modelo->select();
+            QMessageBox::information(this, "Éxito", "Movimiento registrado correctamente.");
         }
     }
 }
@@ -180,12 +198,11 @@ void MainWindow::eliminarArticulo()
         QMessageBox::Yes | QMessageBox::No);
 
     if (reply == QMessageBox::Yes) {
-        // En lugar de borrar físicamente, hacemos un "soft delete"
         QSqlQuery query(DatabaseManager::instance().getDatabase());
         query.prepare("UPDATE articulos SET activo = 0 WHERE id = ?");
         query.addBindValue(id);
         if (query.exec()) {
-            m_modelo->select(); // Refrescar
+            m_modelo->select();
         } else {
             QMessageBox::critical(this, "Error", "No se pudo eliminar: " + query.lastError().text());
         }
@@ -208,10 +225,8 @@ void MainWindow::exportarCSV()
     QTextStream out(&file);
     out.setEncoding(QStringConverter::Utf8);
 
-    // Escribir cabeceras
     out << "ID,Codigo,Nombre,Categoria,Marca,Precio Compra,Precio Venta,Stock,Stock Minimo\n";
 
-    // Consultar datos con JOIN para traer nombres de categoría y marca
     QSqlQuery query(DatabaseManager::instance().getDatabase());
     query.exec("SELECT a.id, a.codigo, a.nombre, c.nombre as categoria, m.nombre as marca, "
                "a.precio_compra, a.precio_venta, a.stock_actual, a.stock_minimo "

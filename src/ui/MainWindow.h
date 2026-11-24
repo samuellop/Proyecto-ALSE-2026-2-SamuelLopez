@@ -20,6 +20,7 @@ private slots:
     void mostrarSoloStockBajo(bool activo);
     void agregarArticulo();
     void editarArticulo();
+    void registrarMovimiento();
     void eliminarArticulo();
     void exportarCSV();
 
@@ -33,6 +34,7 @@ private:
     QLineEdit *m_buscarEdit;
     QPushButton *m_btnAgregar;
     QPushButton *m_btnEditar;
+    QPushButton *m_btnMovimiento; // Nuevo botón
     QPushButton *m_btnEliminar;
     QPushButton *m_btnExportar;
 };

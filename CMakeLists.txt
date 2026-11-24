@@ -24,7 +24,10 @@ set(PROJECT_SOURCES
     src/ui/MainWindow.h
     src/ui/ArticuloDialog.cpp
     src/ui/ArticuloDialog.h
+    src/ui/MovimientoDialog.cpp
+    src/ui/MovimientoDialog.h
 )
+
 
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
 
